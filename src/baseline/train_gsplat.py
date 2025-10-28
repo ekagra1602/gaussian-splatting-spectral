@@ -1,7 +1,4 @@
-"""
-src/baseline/train_gsplat.py
-Wrapper for gsplat training with preset configs
-"""
+
 import subprocess
 import argparse
 from pathlib import Path
