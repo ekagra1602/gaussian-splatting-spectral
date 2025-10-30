@@ -16,3 +16,4 @@ checkpoints/
 data/**/colmap_export/
 gsplat
 vggt
+node_modules/
