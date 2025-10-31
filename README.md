@@ -30,25 +30,6 @@ pip install gsplat
 pip install numpy pillow matplotlib
 git clone https://github.com/facebookresearch/vggt.git
 ````
-
-## 🚀 Usage
-
-1. Extract frames:
-
-```bash
-ffmpeg -i input.mp4 -vf fps=3 data/campus_scene/frames/frame_%04d.png
-```
-
-2. Run VGGT:
-
-```bash
-bash scripts/run_vggt.sh data/campus_scene/frames/ data/campus_scene/colmap_out/
-```
-
-3. Train gsplat:
-
-```bash
-bash scripts/run_gsplat.sh data/campus_scene/colmap_out
 ```
 
 4. Render results → images & turntable video.
