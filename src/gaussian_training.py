@@ -18,5 +18,7 @@ import numpy as np
 from tqdm import tqdm
 import imageio
 
+from datasets.colmap import Dataset as ColmapDataset, Parser
+from utils import rgb_to_sh, knn as knn_sklearn
 
 
