@@ -37,6 +37,7 @@ import yaml
 from fused_ssim import fused_ssim
 from torch import Tensor
 from typing_extensions import Literal
+from typing import Dict, List, Optional, Tuple
 
 from datasets.colmap import Dataset, Parser
 from utils import knn, rgb_to_sh, set_random_seed
@@ -65,7 +66,7 @@ class Config:
     # Path to the Mip-NeRF 360 dataset
     data_dir: str = "data/360_v2/garden"
     # Downsample factor for the dataset
-    data_factor: int = 4
+    data_factor: int = 1
     # Directory to save results
     result_dir: str = "results/garden"
     # Every N images there is a test image
@@ -296,6 +297,7 @@ def rasterize_splats(
     height: int,
     image_ids: Optional[Tensor] = None,
     masks: Optional[Tensor] = None,
+    sh_degree: Optional[int] = None,
 ) -> Tuple[Tensor, Tensor, Dict]:
     """
     Render the current Gaussian set from given camera(s) using gsplat's rasterizer.
@@ -330,6 +332,7 @@ def rasterize_splats(
         rasterize_mode=rasterize_mode,
         distributed=False,
         camera_model=cfg.camera_model,
+        sh_degree=sh_degree,
     )
 
     if masks is not None:
@@ -463,6 +466,7 @@ def train(cfg: Config):
             height=height,
             image_ids=image_ids,
             masks=masks,
+            sh_degree=sh_degree_to_use,
         )
 
         if renders.shape[-1] == 4:
@@ -615,12 +619,13 @@ def train(cfg: Config):
         if step in [i - 1 for i in cfg.ply_steps] or step == max_steps - 1:
             ply_path = ply_dir / f"train_step{step:04d}.ply"
             export_splats(
-                path=str(ply_path),
+                save_to=str(ply_path),
                 means=splats["means"].detach().cpu(),
                 quats=splats["quats"].detach().cpu(),
                 scales=torch.exp(splats["scales"]).detach().cpu(),
                 opacities=torch.sigmoid(splats["opacities"]).detach().cpu(),
-                shs=torch.cat([splats["sh0"], splats["shN"]], dim=1).detach().cpu(),
+                sh0=splats["sh0"].detach().cpu(),
+                shN=splats["shN"].detach().cpu(),
             )
             print(f"[PLY] Saved to {ply_path}")
 
