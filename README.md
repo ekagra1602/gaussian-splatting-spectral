@@ -1,49 +1,43 @@
 # Gaussian Splatting for Campus Reconstruction
 
-This project reconstructs the lantern at Hayden Lawn at ASU campus using **3D Gaussian Splatting**.  
-It combines **VGGT** (Visual Geometry Grounded Transformer, CVPR 2025) for pose estimation with **gsplat** (Nerfstudio’s CUDA Gaussian Splatting library, JMLR 2025) for training and rendering.
+Reconstruction of the lantern at Hayden Lawn (ASU) using **3D Gaussian Splatting** and **VGGT** for pose estimation. This project introduces a custom **Spectral Anisotropy Regularization** to reduce needle-like artifacts in reconstructed Gaussians.
 
-## 📌 Goals
-- Capture campus scene with video/images.
-- Estimate camera poses & sparse 3D points with VGGT (optional COLMAP BA refine).
-- Train Gaussian Splatting model using gsplat.
-- Evaluate with PSNR/SSIM and produce demo videos.
+## 🚀 Quick Start
 
-## 🏗️ Pipeline
-1. Data Capture → campus frames.
-2. Pose Estimation → VGGT → COLMAP-format export.
-3. (Optional) COLMAP BA refinement.
-4. Gaussian Splatting Training → gsplat (with densification, SH colors).
-5. Evaluation & Visualization → metrics + turntable video.
-
-## ⚙️ Setup
-- Python 3.11+, CUDA GPU
-- PyTorch
-- [VGGT](https://github.com/facebookresearch/vggt)
-- [gsplat](https://github.com/nerfstudio-project/gsplat)
-- [COLMAP](https://colmap.github.io/) (optional)
-
-Install:
+### 1. Prepare Data
+Extract and filter frames from video:
 ```bash
-pip install torch torchvision torchaudio
-pip install gsplat
-pip install numpy pillow matplotlib
-git clone https://github.com/facebookresearch/vggt.git
-````
+python src/dataset_prep.py --video <video.mp4> --out data/campus_scene
 ```
 
-4. Render results → images & turntable video.
+### 2. Train (Spectral Regularization)
+Train with custom spectral loss to improve Gaussian shapes:
+```bash
+python src/gaussian_spectral_training.py \
+    --data_dir data/campus_scene \
+    --result_dir Results/Spectral \
+    --use_spectral_loss \
+    --spectral_lambda 0.01
+```
 
-## 📊 Evaluation
+### 3. Train (Baseline)
+Train standard model for comparison:
+```bash
+python src/gaussian_spectral_training.py \
+    --data_dir data/campus_scene \
+    --result_dir Results/Baseline \
+    --spectral_lambda 0.0
+```
 
-* Metrics: PSNR, SSIM on held-out frames.
-* Visuals: turntable video, novel-view sweeps.
+## 🧪 Custom Feature: Spectral Regularization
+Implemented in `src/spectral_loss.py`, this loss penalizes anisotropic (needle-like) Gaussians by maximizing the **Spectral Entropy** of their scales.
+- **Goal**: Encourage spherical shapes, improve geometry, and reduce overfitting.
+- **Loss**: $L_{spectral} = 1 - H_{norm}$ (where $H_{norm}$ is normalized spectral entropy).
 
-## 🔍 References
+## 📂 Structure
+- `src/`: Custom training and prep scripts.
+- `gsplat/` & `vggt/`: Core libraries.
+- `Results/`: Checkpoints (`.pt`) and meshes (`.ply`).
 
-* Kerbl et al., *3D Gaussian Splatting*, SIGGRAPH 2023
-* Fanello et al., *VGGT*, CVPR 2025
-* Kerbl et al., *gsplat*, JMLR 2025
-* Schönberger & Frahm, *COLMAP*, CVPR 2016
-
-``
+## 📚 References
+- **VGGT** (CVPR 2025), **gsplat** (JMLR 2025), **3DGS** (SIGGRAPH 2023)
