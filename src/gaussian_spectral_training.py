@@ -563,12 +563,6 @@ def train(cfg: Config):
             depthloss = F.l1_loss(disp, disp_gt) * scene_scale
             loss += depthloss * cfg.depth_lambda
 
-        # Optional spot to plug your custom Spectral-GS loss:
-        # if cfg.use_spectral_loss:
-        #     from spectral_loss import spectral_loss
-        #     spec = spectral_loss(colors, pixels, info)
-        #     loss += cfg.spectral_lambda * spec
-
         # Regularizers
         if cfg.opacity_reg > 0.0:
             loss += cfg.opacity_reg * torch.sigmoid(splats["opacities"]).mean()
