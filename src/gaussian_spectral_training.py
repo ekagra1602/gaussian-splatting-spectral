@@ -47,11 +47,7 @@ from gsplat.optimizers import SelectiveAdam
 from gsplat.rendering import rasterization
 from gsplat.strategy import DefaultStrategy, MCMCStrategy
 
-
-# -----------------------------------------------------------------------------
 # Configuration dataclass
-# -----------------------------------------------------------------------------
-
 @dataclass
 class Config:
     """
